@@ -51,7 +51,7 @@ public:
 		SetConsoleCursorPosition( GetInstance()->m_hConStdOut, coord );
 
 		std::string out = GetInstance()->initstring( t1... );
-		cout << out << endl;
+		cout << out;
 	}
 
 	static void SetColor( int fore, int back );

@@ -115,15 +115,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Console\Console.cpp" />
-    <ClCompile Include="FrameRate\FrameRate.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="SingletonBase\SingletonBase.cpp" />
+    <ClCompile Include="SourceCode\Console\Console.cpp" />
+    <ClCompile Include="SourceCode\Field\Field.cpp" />
+    <ClCompile Include="SourceCode\FrameRate\FrameRate.cpp" />
+    <ClCompile Include="SourceCode\Main.cpp" />
+    <ClCompile Include="SourceCode\Scene\Scenes\Game\GameScene.cpp" />
+    <ClCompile Include="SourceCode\SingletonBase\SingletonBase.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Console\Console.h" />
-    <ClInclude Include="FrameRate\FrameRate.h" />
-    <ClInclude Include="SingletonBase\SingletonBase.h" />
+    <ClInclude Include="SourceCode\Console\Console.h" />
+    <ClInclude Include="SourceCode\Field\Field.h" />
+    <ClInclude Include="SourceCode\FrameRate\FrameRate.h" />
+    <ClInclude Include="SourceCode\Scene\SceneBase.h" />
+    <ClInclude Include="SourceCode\Scene\SceneManager.h" />
+    <ClInclude Include="SourceCode\Scene\Scenes.h" />
+    <ClInclude Include="SourceCode\Scene\Scenes\Game\GameScene.h" />
+    <ClInclude Include="SourceCode\SingletonBase\SingletonBase.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
