@@ -60,8 +60,8 @@ void CField::Render()
 			break;
 		// ステージの描画.
 		case CField::enFADE_STATE::Not:
-			for( int i = 0; i < m_FadeHeight; i++ )
-				CConsole::Draw( 0, i, m_Field[i] );
+			/*for( int i = 0; i < m_FadeHeight; i++ )
+				CConsole::Draw( 0, -i, m_Field[i] );*/
 
 			break;
 		default:
@@ -74,6 +74,7 @@ void CField::FadeRenderOut()
 	// 描画の範囲分"■"を描画していく.
 	for( int y = 0; y < m_FadeHeight; y++ ){
 		for( int x = 0; x < m_FadeWidth; x+=2 ){
+			CConsole::SetColor( 15, 7 );
 			CConsole::Draw( x, y, "■" );
 			Sleep( 1 );
 		}
@@ -85,6 +86,17 @@ void CField::FadeRenderIn()
 	// 描画の範囲分フィールドを描画してく.
 	for( int y = 0; y < m_FadeHeight; y++ ){
 		for( int x = 0; x < m_FadeWidth; x+=2 ){
+			std::string s;
+			s = m_Field[y][x] + m_Field[y][x+1];
+
+			if( s == "\"" ){
+				CConsole::SetColor( 15, 7 );
+			} else if( s == "ﾁ" ){
+				CConsole::SetColor( 0, 0 );
+			} else {
+				CConsole::SetColor( 7, 0 );
+			}
+
 			CConsole::Draw( x, y, m_Field[y][x], m_Field[y][x+1] );
 			Sleep( 1 );
 		}

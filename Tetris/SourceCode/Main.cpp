@@ -19,7 +19,9 @@ int main()
 		CFrameRate::Start();	// FPSの計測スタート.
 
 #ifdef _DEBUG
-		if( GetAsyncKeyState(VK_ESCAPE) & 0x0001 ) break;
+		if( GetAsyncKeyState(VK_ESCAPE) & 0x0001 ){
+			break;
+		}
 #endif	// #ifdef _DEBUG.
 
 		pSceneManager->Update();
@@ -28,6 +30,7 @@ int main()
 		CFrameRate::Wait();		// FPS計測後の待機.
 	}
 
+	pSceneManager->Release();
 	if( FAILED( CConsole::Destroy() ) ) return 0;
 
 	return 0;

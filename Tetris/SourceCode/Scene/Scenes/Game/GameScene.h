@@ -3,6 +3,8 @@
 
 #include "..\..\SceneBase.h"
 
+class CStage;
+
 class CGameScene : public CSceneBase
 {
 public:
@@ -11,6 +13,9 @@ public:
 
 	virtual void Update() override;
 	virtual void Render() override;
+
+private:
+	std::unique_ptr<CStage>	m_pStage;
 };
 
 #endif	// #ifndef GAME_SCENE_H.

@@ -118,6 +118,7 @@
     <ClCompile Include="SourceCode\Console\Console.cpp" />
     <ClCompile Include="SourceCode\Field\Field.cpp" />
     <ClCompile Include="SourceCode\FrameRate\FrameRate.cpp" />
+    <ClCompile Include="SourceCode\Game\Stage\Stage.cpp" />
     <ClCompile Include="SourceCode\Main.cpp" />
     <ClCompile Include="SourceCode\Scene\Scenes\Game\GameScene.cpp" />
     <ClCompile Include="SourceCode\SingletonBase\SingletonBase.cpp" />
@@ -126,6 +127,8 @@
     <ClInclude Include="SourceCode\Console\Console.h" />
     <ClInclude Include="SourceCode\Field\Field.h" />
     <ClInclude Include="SourceCode\FrameRate\FrameRate.h" />
+    <ClInclude Include="SourceCode\Game\Block\BlockBase.h" />
+    <ClInclude Include="SourceCode\Game\Stage\Stage.h" />
     <ClInclude Include="SourceCode\Scene\SceneBase.h" />
     <ClInclude Include="SourceCode\Scene\SceneManager.h" />
     <ClInclude Include="SourceCode\Scene\Scenes.h" />
