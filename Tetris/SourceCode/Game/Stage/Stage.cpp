@@ -2,16 +2,17 @@
 #include <random>
 
 CStage::CStage()
-	: m_MainStage		()
-	, m_Blocks			( 7 )
-	, NowBlock			( nullptr )
-	, NextBlock			( nullptr )
-	, HoldBlock			( nullptr )
-	, NowPosition		{ 0, 0 }
-	, m_BlockDownCount	( 0 )
-	, m_BlockResetCount	( 7 )
-	, m_BlockList		( 7 )
-	, m_isPutBlock		( false )
+	: m_MainStage			()
+	, m_Blocks				( 7 )
+	, m_NextAndHoldBlocks	( 7 )
+	, NowBlock				( nullptr )
+	, NextBlock				( nullptr )
+	, HoldBlock				( nullptr )
+	, NowPosition			{ 0, 0 }
+	, m_BlockDownCount		( 0 )
+	, m_BlockResetCount		( 7 )
+	, m_BlockList			( 7 )
+	, m_isPutBlock			( false )
 {
 	for( int i = 0; i < 7; i++ ){
 		m_BlockList[i] = i;
@@ -188,26 +189,18 @@ void CStage::CreateStage()
 
 void CStage::CreateBlock()
 {
-	std::vector<Vector2D> pos = { {0,0}, {0,-1}, { 0,1}, { 0,2} };
-	m_Blocks[0] = std::make_shared<CBlockBase>( pos, enColor::L_RED, 2 );
-
-	pos = { {0,0}, {0,-1}, { 0,1}, { 1,1} };
-	m_Blocks[1] = std::make_shared<CBlockBase>( pos, enColor::L_BLUE, 4 );
-
-	pos = { {0,0}, {0,-1}, { 0,1}, {-1,1} };
-	m_Blocks[2] = std::make_shared<CBlockBase>( pos, enColor::L_YELLOW, 4 );
-
-	pos = { {0,0}, {0,-1}, { 1,0}, { 1,1} };
-	m_Blocks[3] = std::make_shared<CBlockBase>( pos, enColor::L_PURPLE, 2 );
-
-	pos = { {0,0}, {0,-1}, {-1,0}, {-1,1} };
-	m_Blocks[4] = std::make_shared<CBlockBase>( pos, enColor::L_GREEN, 2 );
-
-	pos = { {0,0}, {0, 1}, { 1,0}, { 1,1} };
-	m_Blocks[5] = std::make_shared<CBlockBase>( pos, enColor::L_CYAN, 1 );
-
-	pos = { {0,0}, {0,-1}, { 1,0}, { 0,1} };
-	m_Blocks[6] = std::make_shared<CBlockBase>( pos, enColor::L_BLACK, 4 );
+	auto initBlock = [&]( int index, std::vector<Vector2D> pos, enColor color, int rot )
+	{
+		m_Blocks[index] = std::make_shared<CBlockBase>( pos, color, rot );
+		m_NextAndHoldBlocks[index] = std::make_shared<CBlockBase>( pos, color, rot );
+	};
+	initBlock( 0, { {0,0}, {0,-1}, { 0,1}, { 0,2} }, enColor::L_RED, 2 );
+	initBlock( 1, { {0,0}, {0,-1}, { 0,1}, { 1,1} }, enColor::L_BLUE, 4 );
+	initBlock( 2, { {0,0}, {0,-1}, { 0,1}, {-1,1} }, enColor::L_YELLOW, 4 );
+	initBlock( 3, { {0,0}, {0,-1}, { 1,0}, { 1,1} }, enColor::L_PURPLE, 2 );
+	initBlock( 4, { {0,0}, {0,-1}, {-1,0}, {-1,1} }, enColor::L_GREEN, 2 );
+	initBlock( 5, { {0,0}, {0, 1}, { 1,0}, { 1,1} }, enColor::L_CYAN, 1 );
+	initBlock( 6, { {0,0}, {0,-1}, { 1,0}, { 0,1} }, enColor::L_BLACK, 4 );
 }
 
 void CStage::InitNowPosition()

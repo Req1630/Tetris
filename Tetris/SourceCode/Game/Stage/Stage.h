@@ -36,6 +36,7 @@ private:
 	int m_ColorStage[HEIGHT][WIDTH];
 	int m_HoldAndNextBlock[4][4];
 	std::vector<std::shared_ptr<CBlockBase>>	m_Blocks;
+	std::vector<std::shared_ptr<CBlockBase>>	m_NextAndHoldBlocks;
 	std::shared_ptr<CBlockBase> NowBlock;
 	std::shared_ptr<CBlockBase> NextBlock;
 	std::shared_ptr<CBlockBase> HoldBlock;
