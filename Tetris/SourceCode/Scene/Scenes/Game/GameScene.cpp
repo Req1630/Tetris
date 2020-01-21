@@ -6,7 +6,7 @@ CGameScene::CGameScene( sceneManager sceneManager )
 	: CSceneBase	( sceneManager )
 	, m_pStage		( std::make_unique<CStage>() )
 {
-	srand(time(NULL));
+	srand((int)time(NULL));
 
 	m_pField->SetFadeIn();
 	m_pStage->CreateStage();

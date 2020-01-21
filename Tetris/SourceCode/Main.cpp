@@ -19,9 +19,7 @@ int main()
 		CFrameRate::Start();	// FPSの計測スタート.
 
 #ifdef _DEBUG
-		if( GetAsyncKeyState(VK_ESCAPE) & 0x0001 ){
-			break;
-		}
+		if( GetAsyncKeyState(VK_ESCAPE) & 0x0001 ) break;
 #endif	// #ifdef _DEBUG.
 
 		pSceneManager->Update();

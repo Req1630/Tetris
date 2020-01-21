@@ -2,16 +2,22 @@
 #include <random>
 
 CStage::CStage()
-	: m_MainStage		()
-	, m_Blocks			( 7 )
-	, NowBlock			( nullptr )
-	, NextBlock			( nullptr )
-	, HoldBlock			( nullptr )
-	, NowPosition		{ 0, 0 }
-	, m_BlockDownCount	( 0 )
-	, m_BlockResetCount	( 7 )
-	, m_BlockList		( 7 )
-	, m_isPutBlock		( false )
+	: m_MainStage			()
+	, m_Blocks				( 7 )
+	, m_NextAndHoldBlocks	( 7 )
+	, m_NowBlock			( nullptr )
+	, m_NextBlock			( nullptr )
+	, m_HoldBlock			( nullptr )
+	, m_NowPosition			{ 0, 0 }
+	, m_AfterFallingPosition{ 0, 0 }
+	, m_BlockDownCount		( 0 )
+	, m_BlockResetCount		( 7 )
+	, m_NowBlockNumber		( 0 )
+	, m_HoldBlockNumber		( 0 )
+	, m_NextBlockNumber		( -1 )
+	, m_BlockList			( 7 )
+	, m_isPutBlock			( false )
+	, m_isHoldBlock			( false )
 {
 	for( int i = 0; i < 7; i++ ){
 		m_BlockList[i] = i;
@@ -30,63 +36,78 @@ CStage::~CStage()
 void CStage::Control()
 {
 	if( GetAsyncKeyState( VK_RIGHT ) & 0x0001 ){
-		NowPosition.x++;
+		m_NowPosition.x++;
 		for( int i = 0; i < 4; i++ ){
-			if( IsOverlappedBlock( i ) == true ){
-				NowPosition.x--;
-			}
+			if( IsOverlappedBlock( m_NowPosition, i ) == true ) m_NowPosition.x--;
 		}
 	}
 	if( GetAsyncKeyState( VK_LEFT ) & 0x0001 ){
-		NowPosition.x--;
+		m_NowPosition.x--;
 		for( int i = 0; i < 4; i++ ){
-			if( IsOverlappedBlock( i ) == true ){
-				NowPosition.x++;
-			}
+			if( IsOverlappedBlock( m_NowPosition, i ) == true ) m_NowPosition.x++;
 		}
 	}
-	if( GetAsyncKeyState( VK_DOWN ) & 0x0001 ){
-		NowPosition.y++;
-		for( int i = 0; i < 4; i++ ){
-			if( IsOverlappedBlock( i ) == true ){
-				if( IsOverlappedBlock( i ) == false ) continue;
-				NowPosition.y--;
+
+	if( GetAsyncKeyState( VK_UP ) & 0x0001 ){
+		int isHit = false;
+		for( ; isHit != true; ){
+			m_NowPosition.y++;
+			for( int i = 0; i < 4; i++ ){
+				if( IsOverlappedBlock( m_NowPosition, i ) == false ) continue;
+
+				m_NowPosition.y--;
 				for( int i = 0; i < 4; i++ ){
-					m_MainStage[NowPosition.y + NowBlock->GetPosition( i ).y][NowPosition.x + NowBlock->GetPosition( i ).x] = 3;
-					m_ColorStage[NowPosition.y + NowBlock->GetPosition( i ).y][NowPosition.x + NowBlock->GetPosition( i ).x] = (int)NowBlock->GetColor();
+					int x = m_NowPosition.x + m_NowBlock->GetPosition( i ).x;
+					int y = m_NowPosition.y + m_NowBlock->GetPosition( i ).y;
+					m_MainStage[y][x] = 3;
+					m_ColorStage[y][x] = (int)m_NowBlock->GetColor();
+
+					m_isHoldBlock = false;
+					m_isPutBlock = true;
+					isHit = true;
 				}
-				m_isPutBlock = true;
 				InitNowPosition();
 				break;
 			}
 		}
+	} else 
+	if( GetAsyncKeyState( VK_DOWN ) & 0x0001 ){
+		m_NowPosition.y++;
+		BlockPutCheck();
 	}
 	if( GetAsyncKeyState( 'X' ) & 0x0001 ){
-		NowBlock->RightRotation();
+		m_NowBlock->RightRotation();
 		for( int i = 0; i < 4; i++ ){
-			if( IsOverlappedBlock( i ) == true ){
-				NowBlock->LeftRotation();
-			}
+			if( IsOverlappedBlock( m_NowPosition, i ) == true ) m_NowBlock->LeftRotation();
 		}
 	}
 	if( GetAsyncKeyState( 'Z' ) & 0x0001 ){
-		NowBlock->LeftRotation();
+		m_NowBlock->LeftRotation();
 		for( int i = 0; i < 4; i++ ){
-			if( IsOverlappedBlock( i ) == true ){
-				NowBlock->RightRotation();
-			}
+			if( IsOverlappedBlock( m_NowPosition, i ) == true ) m_NowBlock->RightRotation();
 		}
 	}
 	if( GetAsyncKeyState( 'C' ) & 0x0001 ){
-		if( HoldBlock == nullptr ){
-			HoldBlock = NowBlock;
-			InitNowPosition();
-		} else {
-			std::shared_ptr<CBlockBase> tmpBlock = HoldBlock;
-			HoldBlock = NowBlock;
-			NowBlock = tmpBlock;
-			NowPosition.x = INIT_POSITION_X;
-			NowPosition.y = INIT_POSITION_Y;
+		if( m_isHoldBlock == false ){
+			if(m_HoldBlock == nullptr ){
+				m_HoldBlockNumber = m_NowBlockNumber;
+				m_HoldBlock = m_NextAndHoldBlocks[m_NowBlockNumber];
+				InitNowPosition();
+				m_isHoldBlock = true;
+
+			} else {
+				m_NowBlock = m_Blocks[m_HoldBlockNumber];
+				m_HoldBlock = m_NextAndHoldBlocks[m_NowBlockNumber];
+
+				int tmpNumber = m_HoldBlockNumber;
+				m_HoldBlockNumber = m_NowBlockNumber;
+				m_NowBlockNumber = tmpNumber;
+
+				m_NowPosition.x = INIT_POSITION_X;
+				m_NowPosition.y = INIT_POSITION_Y;
+
+				m_isHoldBlock = true;
+			}
 		}
 	}
 }
@@ -96,34 +117,54 @@ void CStage::Update()
 	Control();
 	BlockDown();
 
-	for( int i = 0; i < 4; i++ ){
-		m_MainStage[NowPosition.y+NowBlock->GetPosition(i).y][NowPosition.x+NowBlock->GetPosition(i).x] = 2;
+	bool isHit = false;
+	m_AfterFallingPosition = m_NowPosition;
+	for( ; isHit != true; ){
+		m_AfterFallingPosition.y++;
+		for( int i = 0; i < 4; i++ ){
+			if (IsOverlappedBlock( m_AfterFallingPosition, i ) == false) continue;
+
+			m_AfterFallingPosition.y--;
+			for( int i = 0; i < 4; i++ ){
+				int x = m_AfterFallingPosition.x + m_NowBlock->GetPosition(i).x;
+				int y = m_AfterFallingPosition.y + m_NowBlock->GetPosition(i).y;
+				m_MainStage[y][x] = 4;
+			}
+			isHit = true;
+			break;
+		}
 	}
+
+	for( int i = 0; i < 4; i++ ){
+		m_MainStage[m_NowPosition.y+m_NowBlock->GetPosition(i).y][m_NowPosition.x+m_NowBlock->GetPosition(i).x] = 2;
+	}
+	
 }
 
 void CStage::Render()
 {
-	if( HoldBlock != nullptr ){
-		for( int y = 0; y < 4; y++ ){
-			for( int x = 0; x < 4; x++ ){
-				m_HoldAndNextBlock[y][x] = 0;
-			}
+	auto holdNextBlockRender = [&]( std::shared_ptr<CBlockBase> pBlock, int pos_x )
+	{
+		if (pBlock == nullptr) return;
+		for (int i = 0; i < 4; i++) {
+			m_HoldAndNextBlock[1 + pBlock->GetPosition(i).y][1 + pBlock->GetPosition(i).x] = 1;
 		}
-		for( int i = 0; i < 4; i++ ){
-			m_HoldAndNextBlock[1+HoldBlock->GetPosition( i ).y][1+HoldBlock->GetPosition( i ).x] = 1;
-		}
-		for( int y = 0; y < 4; y++ ){
-			for( int x = 0; x < 8; x+=2 ){
-				if( m_HoldAndNextBlock[y][x/2] == 1 ) {
-					CConsole::SetColor( (int)HoldBlock->GetColor() + 8, (int)HoldBlock->GetColor() );
-					CConsole::Draw( 4+x, 3+y, "Å°" );
+		for (int y = 0; y < 4; y++) {
+			for (int x = 0; x < 8; x += 2) {
+				if (m_HoldAndNextBlock[y][x / 2] == 1) {
+					CConsole::SetColor((int)pBlock->GetColor() + 8, (int)pBlock->GetColor());
+					CConsole::Draw(pos_x + x, 3 + y, "Å°");
 				} else {
-					CConsole::SetColor( 0, 0 );
-					CConsole::Draw( 4+x, 3+y, "  " );
+					CConsole::SetColor(0, 0);
+					CConsole::Draw(pos_x + x, 3 + y, "  ");
 				}
+				m_HoldAndNextBlock[y][x/2] = 0;
 			}
 		}
-	}
+	};
+	holdNextBlockRender( m_HoldBlock, 4 );
+	holdNextBlockRender( m_NextBlock, 40 );
+
 	int tmp_y = -3;
 	for( int y = 0; y < HEIGHT; y++ ){
 		int pos_y = -3 + y;
@@ -150,7 +191,7 @@ void CStage::Render()
 
 				break;
 			case 2:
-				CConsole::SetColor( (int)NowBlock->GetColor()+8, (int)NowBlock->GetColor() );
+				CConsole::SetColor( (int)m_NowBlock->GetColor()+8, (int)m_NowBlock->GetColor() );
 				CConsole::Draw( 14+x, pos_y, "Å°");
 
 				break;
@@ -159,16 +200,26 @@ void CStage::Render()
 				CConsole::Draw( 14+x, pos_y, "Å°");
 
 				break;
+			case 4:
+				CConsole::SetColor( (int)m_NowBlock->GetColor() + 8, (int)enColor::L_BLACK);
+				CConsole::Draw(14 + x, pos_y, "Å†");
+
+				break;
 			default:
 				break;
 			}
 		}
 		tmp_y++;
 	}
-	BlockDelete();
 	for( int i = 0; i < 4; i++ ){
-		m_MainStage[NowPosition.y+NowBlock->GetPosition(i).y][NowPosition.x+NowBlock->GetPosition(i).x] = 0;
+		int x = m_NowPosition.x + m_NowBlock->GetPosition(i).x;
+		int y = m_NowPosition.y + m_NowBlock->GetPosition(i).y;
+		m_MainStage[y][x] = 0;
+		x = m_AfterFallingPosition.x + m_NowBlock->GetPosition( i ).x;
+		y = m_AfterFallingPosition.y + m_NowBlock->GetPosition( i ).y;
+		m_MainStage[y][x] = 0;
 	}
+	BlockDelete();
 }
 
 void CStage::CreateStage()
@@ -188,38 +239,55 @@ void CStage::CreateStage()
 
 void CStage::CreateBlock()
 {
-	std::vector<Vector2D> pos = { {0,0}, {0,-1}, { 0,1}, { 0,2} };
-	m_Blocks[0] = std::make_shared<CBlockBase>( pos, enColor::L_RED, 2 );
-
-	pos = { {0,0}, {0,-1}, { 0,1}, { 1,1} };
-	m_Blocks[1] = std::make_shared<CBlockBase>( pos, enColor::L_BLUE, 4 );
-
-	pos = { {0,0}, {0,-1}, { 0,1}, {-1,1} };
-	m_Blocks[2] = std::make_shared<CBlockBase>( pos, enColor::L_YELLOW, 4 );
-
-	pos = { {0,0}, {0,-1}, { 1,0}, { 1,1} };
-	m_Blocks[3] = std::make_shared<CBlockBase>( pos, enColor::L_PURPLE, 2 );
-
-	pos = { {0,0}, {0,-1}, {-1,0}, {-1,1} };
-	m_Blocks[4] = std::make_shared<CBlockBase>( pos, enColor::L_GREEN, 2 );
-
-	pos = { {0,0}, {0, 1}, { 1,0}, { 1,1} };
-	m_Blocks[5] = std::make_shared<CBlockBase>( pos, enColor::L_CYAN, 1 );
-
-	pos = { {0,0}, {0,-1}, { 1,0}, { 0,1} };
-	m_Blocks[6] = std::make_shared<CBlockBase>( pos, enColor::L_BLACK, 4 );
+	auto initBlock = [&]( int index, std::vector<Vector2D> pos, enColor color, int rot )
+	{
+		m_Blocks[index] = std::make_shared<CBlockBase>( pos, color, rot );
+		m_NextAndHoldBlocks[index] = std::make_shared<CBlockBase>( pos, color, rot );
+	};
+	initBlock( 0, { {0,0}, {0,-1}, { 0,1}, { 0,2} }, enColor::L_RED, 2 );
+	initBlock( 1, { {0,0}, {0,-1}, { 0,1}, { 1,1} }, enColor::L_BLUE, 4 );
+	initBlock( 2, { {0,0}, {0,-1}, { 0,1}, {-1,1} }, enColor::L_YELLOW, 4 );
+	initBlock( 3, { {0,0}, {0,-1}, { 1,0}, { 1,1} }, enColor::L_PURPLE, 2 );
+	initBlock( 4, { {0,0}, {0,-1}, {-1,0}, {-1,1} }, enColor::L_GREEN, 2 );
+	initBlock( 5, { {0,0}, {0, 1}, { 1,0}, { 1,1} }, enColor::L_CYAN, 1 );
+	initBlock( 6, { {0,0}, {0,-1}, { 1,0}, { 0,1} }, enColor::L_BLACK, 4 );
 }
 
 void CStage::InitNowPosition()
 {
-	NowPosition.x = INIT_POSITION_X;
-	NowPosition.y = INIT_POSITION_Y;
+	m_NowPosition.x = INIT_POSITION_X;
+	m_NowPosition.y = INIT_POSITION_Y;
 
 	int i = rand() % m_BlockResetCount;
-	NowBlock = m_Blocks[m_BlockList[i]];
-	m_BlockList.erase(m_BlockList.begin()+i);
+	if( m_NextBlockNumber == -1 ){
+		m_NowBlock = m_Blocks[m_BlockList[i]];
+		m_NowBlockNumber = m_BlockList[i];
 
-	m_BlockResetCount--;
+		m_BlockList.erase(m_BlockList.begin() + i);
+
+		m_BlockResetCount--;
+
+		i = rand() % m_BlockResetCount;
+
+		m_NextBlockNumber = m_BlockList[i];
+		m_NextBlock = m_NextAndHoldBlocks[m_NextBlockNumber];
+
+		m_BlockList.erase(m_BlockList.begin() + i);
+
+		m_BlockResetCount--;
+
+	} else {
+		m_NowBlock = m_Blocks[m_NextBlockNumber];
+		m_NowBlockNumber = m_NextBlockNumber;
+
+		m_NextBlockNumber = m_BlockList[i];
+
+		m_NextBlock = m_NextAndHoldBlocks[m_NextBlockNumber];
+
+		m_BlockList.erase(m_BlockList.begin() + i);
+
+		m_BlockResetCount--;
+	}
 
 	if( m_BlockResetCount == 0 ){
 		for( int i = 0; i < 7; i++ ){
@@ -233,21 +301,30 @@ void CStage::InitNowPosition()
 void CStage::BlockDown()
 {
 	if( m_BlockDownCount >= 30 ){
-		NowPosition.y++;
-		for( int i = 0; i < 4; i++ ){
-			if( IsOverlappedBlock( i ) == false ) continue;
-			NowPosition.y--;
-			for( int i = 0; i < 4; i++ ){
-				m_MainStage[NowPosition.y + NowBlock->GetPosition( i ).y][NowPosition.x + NowBlock->GetPosition( i ).x] = 3;
-				m_ColorStage[NowPosition.y + NowBlock->GetPosition( i ).y][NowPosition.x + NowBlock->GetPosition( i ).x] = (int)NowBlock->GetColor();
-			}
-			m_isPutBlock = true;
-			InitNowPosition();
-			break;
-		}
+		m_NowPosition.y++;
+		BlockPutCheck();
 		m_BlockDownCount = 0;
 	}
 	m_BlockDownCount++;
+}
+
+void CStage::BlockPutCheck()
+{
+	for( int i = 0; i < 4; i++ ){
+		if( IsOverlappedBlock( m_NowPosition, i ) == false ) continue;
+		m_NowPosition.y--;
+		for( int i = 0; i < 4; i++ ){
+			int x = m_NowPosition.x + m_NowBlock->GetPosition( i ).x;
+			int y = m_NowPosition.y + m_NowBlock->GetPosition( i ).y;
+			m_MainStage[y][x] = 3;
+			m_ColorStage[y][x] = (int)m_NowBlock->GetColor();
+		}
+		m_isHoldBlock = false;
+		m_isPutBlock = true;
+		InitNowPosition();
+		
+		break;
+	}
 }
 
 void CStage::BlockDelete()
@@ -275,9 +352,9 @@ void CStage::BlockDelete()
 	m_isPutBlock = false;
 }
 
-bool CStage::IsOverlappedBlock( int index )
+bool CStage::IsOverlappedBlock( const Vector2D& pos, int index )
 {
-	int _x = NowPosition.x + NowBlock->GetPosition( index ).x;
-	int _y = NowPosition.y + NowBlock->GetPosition( index ).y;
-	return m_MainStage[_y][_x] != 0?true:false;
+	int _x = pos.x + m_NowBlock->GetPosition( index ).x;
+	int _y = pos.y + m_NowBlock->GetPosition( index ).y;
+	return m_MainStage[_y][_x] != 0 ? true : false;
 }

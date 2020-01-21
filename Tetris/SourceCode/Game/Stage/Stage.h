@@ -18,7 +18,6 @@ public:
 	CStage();
 	~CStage();
 
-
 	void Control();
 	void Update();
 	void Render();
@@ -28,24 +27,31 @@ public:
 
 private:
 	void BlockDown();
+	void BlockPutCheck();
 	void BlockDelete();
-	bool IsOverlappedBlock( int index );
+	bool IsOverlappedBlock( const Vector2D& pos, int index );
 
 private:
 	int m_MainStage[HEIGHT][WIDTH];
 	int m_ColorStage[HEIGHT][WIDTH];
 	int m_HoldAndNextBlock[4][4];
 	std::vector<std::shared_ptr<CBlockBase>>	m_Blocks;
-	std::shared_ptr<CBlockBase> NowBlock;
-	std::shared_ptr<CBlockBase> NextBlock;
-	std::shared_ptr<CBlockBase> HoldBlock;
-	Vector2D					NowPosition;
+	std::vector<std::shared_ptr<CBlockBase>>	m_NextAndHoldBlocks;
+	std::shared_ptr<CBlockBase> m_NowBlock;
+	std::shared_ptr<CBlockBase> m_NextBlock;
+	std::shared_ptr<CBlockBase> m_HoldBlock;
+	Vector2D					m_NowPosition;
+	Vector2D					m_AfterFallingPosition;
 
 	int m_BlockDownCount;
 	int m_BlockResetCount;
+	int m_NowBlockNumber;
+	int m_HoldBlockNumber;
+	int m_NextBlockNumber;
 	std::vector<int> m_BlockList;
 
 	bool m_isPutBlock;
+	bool m_isHoldBlock;
 };
 
 #endif	// #ifndef STAGE_H.
