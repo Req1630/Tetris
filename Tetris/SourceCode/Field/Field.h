@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 class CField
 {
@@ -23,19 +24,25 @@ public:
 	CField();
 	~CField();
 
+	static CField* GetInstance()
+	{
+		static std::unique_ptr<CField>instance = std::make_unique<CField>();
+		return instance.get();
+	}
+
 	// フィールドデータの読み込み.
-	void FieldDataRead();
+	static void FieldDataRead();
 	// 描画.
-	void Render();
+	static void Render();
 
 	// フェードしてないかどうか.
-	bool IsNotFade(){ return m_FadeState == enFADE_STATE::Not? true : false; }
+	static bool IsNotFade(){ return GetInstance()->m_FadeState == enFADE_STATE::Not? true : false; }
 
 	// フェードインの設定.
-	void SetFadeIn(){ m_FadeState = enFADE_STATE::In; }
+	static void SetFadeIn(){ GetInstance()->m_FadeState = enFADE_STATE::In; }
 	// フェードアウトの設定.
-	void SetFadeOut(){ m_FadeState = enFADE_STATE::Out; }
-	void SetTitle(){ m_FadeState = enFADE_STATE::Title; }
+	static void SetFadeOut(){ GetInstance()->m_FadeState = enFADE_STATE::Out; }
+	static void SetTitle(){ GetInstance()->m_FadeState = enFADE_STATE::Title; }
 
 
 private:

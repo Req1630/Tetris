@@ -2,7 +2,6 @@
 #define SCENE_BASE_H
 
 #include <memory>
-#include "..\Field\Field.h"
 
 class CSceneManager;
 class CConsole;
@@ -15,10 +14,8 @@ protected:
 public:
 	CSceneBase( sceneManager sceneManager )
 		: m_pSceneManager	( sceneManager )
-		, m_pField			( std::make_unique<CField>() )
 		, m_isGameEnd		( false )
 	{
-		m_pField->FieldDataRead();
 	}
 
 	virtual ~CSceneBase(){}
@@ -31,7 +28,6 @@ public:
 protected:
 	CSceneBase(){}
 	sceneManager m_pSceneManager;
-	std::unique_ptr<CField>	m_pField;
 
 	bool m_isGameEnd;
 };

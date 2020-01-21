@@ -1,18 +1,19 @@
 #include "GameScene.h"
 #include "..\..\..\Console\Console.h"
 #include "..\..\..\Game\Stage\Stage.h"
+#include "..\Title\TitleScene.h"
+#include "..\..\SceneManager.h"
+#include "..\..\..\Field\Field.h"
 
 CGameScene::CGameScene( sceneManager sceneManager )
 	: CSceneBase	( sceneManager )
 	, m_pStage		( std::make_unique<CStage>() )
-{
-	srand((int)time(NULL));
-
-	m_pField->SetFadeIn();
+{	
+	CField::SetFadeIn();
 	m_pStage->CreateStage();
 	m_pStage->CreateBlock();
 	m_pStage->InitNowPosition();
-	m_pField->Render();	// フィールドの表示.
+	CField::Render();	// フィールドの表示.
 }
 
 CGameScene::~CGameScene()
@@ -22,6 +23,9 @@ CGameScene::~CGameScene()
 void CGameScene::Update()
 {
 	m_pStage->Update();
+	if( m_pStage->GetGameEnd() == true ){
+		m_pSceneManager->Change( std::make_shared<CTitleScene>( m_pSceneManager ) );
+	}
 }
 
 void CGameScene::Render()

@@ -24,17 +24,20 @@ public:
 	void CreateStage();
 	void CreateBlock();
 	void InitNowPosition();
+	bool GetGameEnd() const { return m_isGameEnd; }
 
 private:
 	void BlockDown();
 	void BlockPutCheck();
 	void BlockDelete();
+	void GameOverCheck();
+	bool GameOverRender();
 	bool IsOverlappedBlock( const Vector2D& pos, int index );
 
 private:
-	int m_MainStage[HEIGHT][WIDTH];
-	int m_ColorStage[HEIGHT][WIDTH];
-	int m_HoldAndNextBlock[4][4];
+	std::vector<std::vector<int>> m_MainStage;
+	std::vector<std::vector<int>> m_ColorStage;
+	std::vector<std::vector<int>> m_HoldAndNextBlock;
 	std::vector<std::shared_ptr<CBlockBase>>	m_Blocks;
 	std::vector<std::shared_ptr<CBlockBase>>	m_NextAndHoldBlocks;
 	std::shared_ptr<CBlockBase> m_NowBlock;
@@ -52,6 +55,8 @@ private:
 
 	bool m_isPutBlock;
 	bool m_isHoldBlock;
+	bool m_isGameOver;
+	bool m_isGameEnd;
 };
 
 #endif	// #ifndef STAGE_H.

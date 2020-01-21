@@ -38,40 +38,28 @@ void CField::FieldDataRead()
 		return field;
 	};
 
-	//// ファイルの読み込み.
-	//std::ifstream ifs( FIELD_TEXT_PATH );
-
-	//if( ifs.fail() ){
-	//	CConsole::Draw( 0, 0, FIELD_TEXT_PATH, " : 読み込み失敗" );
-	//	return;
-	//}
-
-	//// 各行の取得,
-	//std::string line;
-	//while( getline( ifs, line ) ) m_Field.emplace_back( line );
-
-	m_Field = read( FIELD_TEXT_PATH );
+	GetInstance()->m_Field = read( GetInstance()->FIELD_TEXT_PATH );
 
 	// 描画範囲の高さと幅を取得,
-	m_FadeWidth = m_Field[0].size();
-	m_FadeHeight = m_Field.size();
+	GetInstance()->m_FadeWidth = GetInstance()->m_Field[0].size();
+	GetInstance()->m_FadeHeight = GetInstance()->m_Field.size();
 
-	std::vector<std::string> field = read( TITLE_TEXT_PATH );
-	for( int y = 0; y < m_FadeHeight; y++ ){
-		m_Title.emplace_back();
-		for( int x = 0; x < m_FadeWidth/2; x++ ){
-			m_Title[y].emplace_back( (int)field[y][x]-48 );
+	std::vector<std::string> field = read( GetInstance()->TITLE_TEXT_PATH );
+	for( int y = 0; y < GetInstance()->m_FadeHeight; y++ ){
+		GetInstance()->m_Title.emplace_back();
+		for( int x = 0; x < GetInstance()->m_FadeWidth/2; x++ ){
+			GetInstance()->m_Title[y].emplace_back( (int)field[y][x]-48 );
 		}
 	}
 }
 
 void CField::Render()
 {
-	switch( m_FadeState ){
+	switch( GetInstance()->m_FadeState ){
 		// 初期状態.
 		case CField::enFADE_STATE::None:
-			for( int y = 0; y < m_FadeHeight; y++ ){
-				for( int x = 0; x < m_FadeWidth; x += 2 ){
+			for( int y = 0; y < GetInstance()->m_FadeHeight; y++ ){
+				for( int x = 0; x < GetInstance()->m_FadeWidth; x += 2 ){
 					CConsole::Draw( x, y, "■" );
 				}
 			}
@@ -79,19 +67,19 @@ void CField::Render()
 			break;
 		// フェードアウト(黒くなる).
 		case CField::enFADE_STATE::Out:
-			FadeRenderOut();
+			GetInstance()->FadeRenderOut();
 
 			break;
 		// フェードイン(明るくなる).
 		case CField::enFADE_STATE::In:
-			FadeRenderIn();
+			GetInstance()->FadeRenderIn();
 
 			break;
 			// フェードイン(明るくなる).
 		case CField::enFADE_STATE::Title:
-			for( int y = 0; y < m_FadeHeight; y++ ){
-				for( int x = 0; x < m_FadeWidth; x += 2 ){
-					switch( m_Title[y][x/2] ){
+			for( int y = 0; y < GetInstance()->m_FadeHeight; y++ ){
+				for( int x = 0; x < GetInstance()->m_FadeWidth; x += 2 ){
+					switch( GetInstance()->m_Title[y][x/2] ){
 						case 0:
 							CConsole::SetColor( (int)enColor::H_WHITE, (int)enColor::L_WHITE );
 							CConsole::Draw( x, y, "■" );

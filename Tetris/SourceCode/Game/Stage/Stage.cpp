@@ -2,14 +2,16 @@
 #include <random>
 
 CStage::CStage()
-	: m_MainStage			()
+	: m_MainStage			( HEIGHT )
+	, m_ColorStage			( HEIGHT )
+	, m_HoldAndNextBlock	( 4 )
 	, m_Blocks				( 7 )
 	, m_NextAndHoldBlocks	( 7 )
 	, m_NowBlock			( nullptr )
 	, m_NextBlock			( nullptr )
 	, m_HoldBlock			( nullptr )
-	, m_NowPosition			{ 0, 0 }
-	, m_AfterFallingPosition{ 0, 0 }
+	, m_NowPosition			{ INIT_POSITION_X, INIT_POSITION_Y }
+	, m_AfterFallingPosition{ INIT_POSITION_X, INIT_POSITION_Y }
 	, m_BlockDownCount		( 0 )
 	, m_BlockResetCount		( 7 )
 	, m_NowBlockNumber		( 0 )
@@ -18,14 +20,21 @@ CStage::CStage()
 	, m_BlockList			( 7 )
 	, m_isPutBlock			( false )
 	, m_isHoldBlock			( false )
+	, m_isGameOver			( false )
 {
+	srand((int)time(nullptr));
 	for( int i = 0; i < 7; i++ ){
 		m_BlockList[i] = i;
 	}
 	for( int y = 0; y < 4; y++ ){
 		for( int x = 0; x < 4; x++ ){
+			m_HoldAndNextBlock[y].emplace_back();
 			m_HoldAndNextBlock[y][x] = 0;
 		}
+	}
+	for( int y = 0; y < HEIGHT; y++ ){
+		m_MainStage[y].resize( WIDTH );
+		m_ColorStage[y].resize( WIDTH );
 	}
 }
 
@@ -50,7 +59,7 @@ void CStage::Control()
 
 	if( GetAsyncKeyState( VK_UP ) & 0x0001 ){
 		int isHit = false;
-		for( ; isHit != true; ){
+		while( isHit != true ){
 			m_NowPosition.y++;
 			for( int i = 0; i < 4; i++ ){
 				if( IsOverlappedBlock( m_NowPosition, i ) == false ) continue;
@@ -114,12 +123,14 @@ void CStage::Control()
 
 void CStage::Update()
 {
+	if( m_isGameOver == true ) return;
+
 	Control();
 	BlockDown();
 
 	bool isHit = false;
 	m_AfterFallingPosition = m_NowPosition;
-	for( ; isHit != true; ){
+	while( isHit != true ){
 		m_AfterFallingPosition.y++;
 		for( int i = 0; i < 4; i++ ){
 			if (IsOverlappedBlock( m_AfterFallingPosition, i ) == false) continue;
@@ -143,6 +154,8 @@ void CStage::Update()
 
 void CStage::Render()
 {
+	if( GameOverRender() == true ) return;
+
 	auto holdNextBlockRender = [&]( std::shared_ptr<CBlockBase> pBlock, int pos_x )
 	{
 		if (pBlock == nullptr) return;
@@ -211,6 +224,7 @@ void CStage::Render()
 		}
 		tmp_y++;
 	}
+	
 	for( int i = 0; i < 4; i++ ){
 		int x = m_NowPosition.x + m_NowBlock->GetPosition(i).x;
 		int y = m_NowPosition.y + m_NowBlock->GetPosition(i).y;
@@ -219,6 +233,7 @@ void CStage::Render()
 		y = m_AfterFallingPosition.y + m_NowBlock->GetPosition( i ).y;
 		m_MainStage[y][x] = 0;
 	}
+	GameOverCheck();
 	BlockDelete();
 }
 
@@ -308,6 +323,38 @@ void CStage::BlockDown()
 	m_BlockDownCount++;
 }
 
+void CStage::GameOverCheck()
+{
+	m_NowPosition.y++;
+	for( int i = 0; i < 4; i++ ){
+		if( IsOverlappedBlock( m_NowPosition, i ) == false ) continue;
+		if( m_NowPosition.y != INIT_POSITION_Y+1 ) continue;
+		m_NowPosition.y--;
+		m_isGameOver = true;
+		return;
+	}
+	m_NowPosition.y--;
+};
+
+bool CStage::GameOverRender()
+{
+	if( m_isGameOver == false ) return false;
+
+	for( int y = HEIGHT-1; y >= 4; y-- ){
+		for( int x = 0; x < WIDTH*2; x += 2 ){
+			if( m_MainStage[y][x/2] == 3 || m_MainStage[y][x/2] == 2 ){
+				CConsole::SetColor( (int)enColor::H_WHITE, (int)enColor::L_WHITE );
+				CConsole::Draw( 14+x, y-3, "¡");
+				Sleep(40);
+			}
+		}
+	}
+	m_isGameEnd = true;
+	Sleep(100);
+
+	return true;
+}
+
 void CStage::BlockPutCheck()
 {
 	for( int i = 0; i < 4; i++ ){
@@ -356,5 +403,7 @@ bool CStage::IsOverlappedBlock( const Vector2D& pos, int index )
 {
 	int _x = pos.x + m_NowBlock->GetPosition( index ).x;
 	int _y = pos.y + m_NowBlock->GetPosition( index ).y;
-	return m_MainStage[_y][_x] != 0 ? true : false;
+	if( m_MainStage[_y][_x] == 2 ) return false;
+	if(	m_MainStage[_y][_x] == 0 ) return false;
+	return true;
 }

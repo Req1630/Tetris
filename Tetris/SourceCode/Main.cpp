@@ -2,6 +2,7 @@
 #include "FrameRate/FrameRate.h"
 #include "Scene/SceneManager.h"
 #include "Scene/Scenes.h"
+#include "Field/Field.h"
 
 int main()
 {
@@ -10,6 +11,8 @@ int main()
 
 	// フレームレート(FPS)の初期化.
 	CFrameRate::Init();
+
+	CField::FieldDataRead();
 
 	// シーンマネージャーの作成.
 	std::shared_ptr<CSceneManager> pSceneManager 

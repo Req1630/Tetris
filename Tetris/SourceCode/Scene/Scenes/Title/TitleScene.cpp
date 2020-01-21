@@ -3,6 +3,7 @@
 #include "..\..\..\Game\Stage\Stage.h"
 #include "..\Game\GameScene.h"
 #include "..\..\SceneManager.h"
+#include "..\..\..\Field\Field.h"
 
 #include <memory>
 
@@ -11,10 +12,10 @@ CTitleScene::CTitleScene( sceneManager sceneManager )
 
 	, m_Select	( Start )
 {
-	m_pField->SetFadeOut();
-	m_pField->Render();
-	m_pField->SetTitle();
-	m_pField->Render();
+	CField::SetFadeOut();
+	CField::Render();
+	CField::SetTitle();
+	CField::Render();
 }
 
 CTitleScene::~CTitleScene()
