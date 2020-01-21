@@ -13,7 +13,9 @@ int main()
 
 	// シーンマネージャーの作成.
 	std::shared_ptr<CSceneManager> pSceneManager 
-		= std::make_shared<CSceneManager>( std::make_shared<CGameScene>( pSceneManager ) );
+		= std::make_shared<CSceneManager>();
+
+	pSceneManager->Push( std::make_shared<CTitleScene>( pSceneManager ) );
 
 	while(1){
 		CFrameRate::Start();	// FPSの計測スタート.
@@ -21,6 +23,7 @@ int main()
 #ifdef _DEBUG
 		if( GetAsyncKeyState(VK_ESCAPE) & 0x0001 ) break;
 #endif	// #ifdef _DEBUG.
+		if( pSceneManager->GetGameEnd() == true ) break;
 
 		pSceneManager->Update();
 		pSceneManager->Render();

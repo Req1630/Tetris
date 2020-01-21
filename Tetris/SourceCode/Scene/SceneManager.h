@@ -21,12 +21,17 @@ public:
 	}
 
 	void Update(){ m_pStackScene.top()->Update(); }
-
 	void Render(){ m_pStackScene.top()->Render(); }
+	bool GetGameEnd() const { return m_pStackScene.top()->GetGameEnd(); }
 
-	void Change( sceneBase& pSceneBase )
+	void Change( sceneBase pSceneBase )
 	{
 		m_pStackScene.pop();
+		m_pStackScene.push( pSceneBase );
+	}
+
+	void Push( sceneBase pSceneBase )
+	{
 		m_pStackScene.push( pSceneBase );
 	}
 

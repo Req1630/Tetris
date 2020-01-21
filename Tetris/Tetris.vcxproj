@@ -121,6 +121,7 @@
     <ClCompile Include="SourceCode\Game\Stage\Stage.cpp" />
     <ClCompile Include="SourceCode\Main.cpp" />
     <ClCompile Include="SourceCode\Scene\Scenes\Game\GameScene.cpp" />
+    <ClCompile Include="SourceCode\Scene\Scenes\Title\TitleScene.cpp" />
     <ClCompile Include="SourceCode\SingletonBase\SingletonBase.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +134,7 @@
     <ClInclude Include="SourceCode\Scene\SceneManager.h" />
     <ClInclude Include="SourceCode\Scene\Scenes.h" />
     <ClInclude Include="SourceCode\Scene\Scenes\Game\GameScene.h" />
+    <ClInclude Include="SourceCode\Scene\Scenes\Title\TitleScene.h" />
     <ClInclude Include="SourceCode\SingletonBase\SingletonBase.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

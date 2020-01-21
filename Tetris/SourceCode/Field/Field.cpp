@@ -7,6 +7,7 @@
 
 CField::CField()
 	: m_Field		()
+	, m_Title		()
 	, m_FadeHeight	( 0 )
 	, m_FadeWidth	( 0 )
 	, m_FadeState	( enFADE_STATE::None )
@@ -19,21 +20,49 @@ CField::~CField()
 
 void CField::FieldDataRead()
 {
-	// ファイルの読み込み.
-	std::ifstream ifs( FIELD_TEXT_PATH );
+	auto read = []( const std::string fileName) -> std::vector<std::string>
+	{
+		// ファイルの読み込み.
+		std::ifstream ifs( fileName );
+		std::vector<std::string> field;
 
-	if( ifs.fail() ){
-		CConsole::Draw( 0, 0, FIELD_TEXT_PATH, " : 読み込み失敗" );
-		return;
-	}
+		if( ifs.fail() ){
+			CConsole::Draw( 0, 0, fileName, " : 読み込み失敗" );
+			return field;
+		}
+		
+		// 各行の取得,
+		std::string line;
+		while( getline( ifs, line ) ) field.emplace_back( line );
 
-	// 各行の取得,
-	std::string line;
-	while( getline( ifs, line ) ) m_Field.emplace_back( line );
+		return field;
+	};
+
+	//// ファイルの読み込み.
+	//std::ifstream ifs( FIELD_TEXT_PATH );
+
+	//if( ifs.fail() ){
+	//	CConsole::Draw( 0, 0, FIELD_TEXT_PATH, " : 読み込み失敗" );
+	//	return;
+	//}
+
+	//// 各行の取得,
+	//std::string line;
+	//while( getline( ifs, line ) ) m_Field.emplace_back( line );
+
+	m_Field = read( FIELD_TEXT_PATH );
 
 	// 描画範囲の高さと幅を取得,
 	m_FadeWidth = m_Field[0].size();
 	m_FadeHeight = m_Field.size();
+
+	std::vector<std::string> field = read( TITLE_TEXT_PATH );
+	for( int y = 0; y < m_FadeHeight; y++ ){
+		m_Title.emplace_back();
+		for( int x = 0; x < m_FadeWidth/2; x++ ){
+			m_Title[y].emplace_back( (int)field[y][x]-48 );
+		}
+	}
 }
 
 void CField::Render()
@@ -56,6 +85,51 @@ void CField::Render()
 		// フェードイン(明るくなる).
 		case CField::enFADE_STATE::In:
 			FadeRenderIn();
+
+			break;
+			// フェードイン(明るくなる).
+		case CField::enFADE_STATE::Title:
+			for( int y = 0; y < m_FadeHeight; y++ ){
+				for( int x = 0; x < m_FadeWidth; x += 2 ){
+					switch( m_Title[y][x/2] ){
+						case 0:
+							CConsole::SetColor( (int)enColor::H_WHITE, (int)enColor::L_WHITE );
+							CConsole::Draw( x, y, "■" );
+							break;
+						case 1:
+							CConsole::SetColor( (int)enColor::H_RED, (int)enColor::L_RED );
+							CConsole::Draw( x, y, "■" );
+							break;
+						case 2:
+							CConsole::SetColor( (int)enColor::H_YELLOW, (int)enColor::L_YELLOW );
+							CConsole::Draw( x, y, "■" );
+							break;
+						case 3:
+							CConsole::SetColor( (int)enColor::H_BLUE, (int)enColor::L_BLUE );
+							CConsole::Draw( x, y, "■" );
+							break;
+						case 4:
+							CConsole::SetColor( (int)enColor::H_GREEN, (int)enColor::L_GREEN );
+							CConsole::Draw( x, y, "■" );
+							break;
+						case 5:
+							CConsole::SetColor( (int)enColor::H_CYAN, (int)enColor::L_CYAN );
+							CConsole::Draw( x, y, "■" );
+							break;
+						case 6:
+							CConsole::SetColor( (int)enColor::H_PURPLE, (int)enColor::L_PURPLE );
+							CConsole::Draw( x, y, "■" );
+							break;
+						case 7:
+							CConsole::SetColor( (int)enColor::L_BLACK, (int)enColor::L_BLACK );
+							CConsole::Draw( x, y, "■" );
+							break;
+						default:
+							break;
+					}
+					
+				}
+			}
 
 			break;
 		// ステージの描画.
