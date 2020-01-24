@@ -13,7 +13,7 @@ CScore::~CScore()
 void CScore::Render()
 {
 	CConsole::SetColor( (int)enColor::H_WHITE, (int)enColor::L_BLACK );
-	CConsole::Draw( 39, 17, "Score : ", m_Score );
+	CConsole::Draw( 39, 18, "Score : ", m_Score );
 }
 
 void CScore::SetDeleteLine( const int& line )

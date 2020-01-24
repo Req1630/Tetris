@@ -14,7 +14,7 @@ CLevel::~CLevel()
 void CLevel::Render()
 {
 	CConsole::SetColor( (int)enColor::H_WHITE, (int)enColor::L_BLACK );
-	CConsole::Draw( 39, 15, "Level : ", m_Level );
+	CConsole::Draw( 39, 16, "Level : ", m_Level );
 }
 
 void CLevel::SetDeleteLine( const int& line )
