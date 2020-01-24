@@ -4,33 +4,29 @@
 CStage::CStage()
 	: m_MainStage			( HEIGHT )
 	, m_ColorStage			( HEIGHT )
-	, m_HoldAndNextBlock	( 4 )
 	, m_Blocks				( 7 )
 	, m_NextAndHoldBlocks	( 7 )
 	, m_NowBlock			( nullptr )
-	, m_NextBlock			( nullptr )
-	, m_HoldBlock			( nullptr )
 	, m_NowPosition			{ INIT_POSITION_X, INIT_POSITION_Y }
 	, m_AfterFallingPosition{ INIT_POSITION_X, INIT_POSITION_Y }
+
+	, m_pNextBlock			( std::make_unique<CNextBlock>() )
+	, m_pHoldBlock			( std::make_unique<CHoldBlock>() )
+	
 	, m_BlockDownCount		( 0 )
+	, m_BlockDownTime		( 30 )
 	, m_BlockResetCount		( 7 )
 	, m_NowBlockNumber		( 0 )
-	, m_HoldBlockNumber		( 0 )
-	, m_NextBlockNumber		( -1 )
 	, m_BlockList			( 7 )
+	, m_DeleteLine			( 0 )
 	, m_isPutBlock			( false )
 	, m_isHoldBlock			( false )
 	, m_isGameOver			( false )
+	, m_isGameEnd			( false )
 {
 	srand((int)time(nullptr));
 	for( int i = 0; i < 7; i++ ){
 		m_BlockList[i] = i;
-	}
-	for( int y = 0; y < 4; y++ ){
-		for( int x = 0; x < 4; x++ ){
-			m_HoldAndNextBlock[y].emplace_back();
-			m_HoldAndNextBlock[y][x] = 0;
-		}
 	}
 	for( int y = 0; y < HEIGHT; y++ ){
 		m_MainStage[y].resize( WIDTH );
@@ -58,7 +54,7 @@ void CStage::Control()
 	}
 
 	if( GetAsyncKeyState( VK_UP ) & 0x0001 ){
-		int isHit = false;
+		bool isHit = false;
 		while( isHit != true ){
 			m_NowPosition.y++;
 			for( int i = 0; i < 4; i++ ){
@@ -98,18 +94,18 @@ void CStage::Control()
 	}
 	if( GetAsyncKeyState( 'C' ) & 0x0001 ){
 		if( m_isHoldBlock == false ){
-			if(m_HoldBlock == nullptr ){
-				m_HoldBlockNumber = m_NowBlockNumber;
-				m_HoldBlock = m_NextAndHoldBlocks[m_NowBlockNumber];
+			if(m_pHoldBlock->GetBlock() == nullptr ){
+				m_pHoldBlock->SetBlockNumber( m_NowBlockNumber );
+				m_pHoldBlock->SetBlock( m_NextAndHoldBlocks[m_NowBlockNumber] );
 				InitNowPosition();
 				m_isHoldBlock = true;
 
 			} else {
-				m_NowBlock = m_Blocks[m_HoldBlockNumber];
-				m_HoldBlock = m_NextAndHoldBlocks[m_NowBlockNumber];
+				m_NowBlock = m_Blocks[m_pHoldBlock->GetBlockNumber()];
+				m_pHoldBlock->SetBlock( m_NextAndHoldBlocks[m_NowBlockNumber] );
 
-				int tmpNumber = m_HoldBlockNumber;
-				m_HoldBlockNumber = m_NowBlockNumber;
+				int tmpNumber = m_pHoldBlock->GetBlockNumber();
+				m_pHoldBlock->SetBlockNumber( m_NowBlockNumber );
 				m_NowBlockNumber = tmpNumber;
 
 				m_NowPosition.x = INIT_POSITION_X;
@@ -156,35 +152,12 @@ void CStage::Render()
 {
 	if( GameOverRender() == true ) return;
 
-	auto holdNextBlockRender = [&]( std::shared_ptr<CBlockBase> pBlock, int pos_x )
-	{
-		if (pBlock == nullptr) return;
-		for (int i = 0; i < 4; i++) {
-			m_HoldAndNextBlock[1 + pBlock->GetPosition(i).y][1 + pBlock->GetPosition(i).x] = 1;
-		}
-		for (int y = 0; y < 4; y++) {
-			for (int x = 0; x < 8; x += 2) {
-				if (m_HoldAndNextBlock[y][x / 2] == 1) {
-					CConsole::SetColor((int)pBlock->GetColor() + 8, (int)pBlock->GetColor());
-					CConsole::Draw(pos_x + x, 3 + y, "¡");
-				} else {
-					CConsole::SetColor(0, 0);
-					CConsole::Draw(pos_x + x, 3 + y, "  ");
-				}
-				m_HoldAndNextBlock[y][x/2] = 0;
-			}
-		}
-	};
-	holdNextBlockRender( m_HoldBlock, 4 );
-	holdNextBlockRender( m_NextBlock, 40 );
+	m_pHoldBlock->Render();
+	m_pNextBlock->Render();
 
-	int tmp_y = -3;
 	for( int y = 0; y < HEIGHT; y++ ){
 		int pos_y = -3 + y;
-		if( tmp_y < 0 ){
-			tmp_y++;
-			continue;
-		}
+		if( pos_y < 0 ) continue;
 		for( int x = 0; x < WIDTH*2; x+=2 ){
 			if( pos_y == 0 ){
 				CConsole::SetColor( (int)enColor::H_WHITE, (int)enColor::L_WHITE );
@@ -222,7 +195,6 @@ void CStage::Render()
 				break;
 			}
 		}
-		tmp_y++;
 	}
 	
 	for( int i = 0; i < 4; i++ ){
@@ -274,7 +246,7 @@ void CStage::InitNowPosition()
 	m_NowPosition.y = INIT_POSITION_Y;
 
 	int i = rand() % m_BlockResetCount;
-	if( m_NextBlockNumber == -1 ){
+	if( m_pNextBlock->GetBlockNumber() == -1 ){
 		m_NowBlock = m_Blocks[m_BlockList[i]];
 		m_NowBlockNumber = m_BlockList[i];
 
@@ -284,20 +256,19 @@ void CStage::InitNowPosition()
 
 		i = rand() % m_BlockResetCount;
 
-		m_NextBlockNumber = m_BlockList[i];
-		m_NextBlock = m_NextAndHoldBlocks[m_NextBlockNumber];
+		m_pNextBlock->SetBlockNumber( m_BlockList[i]);
+		m_pNextBlock->SetBlock( m_NextAndHoldBlocks[m_BlockList[i]] );
 
 		m_BlockList.erase(m_BlockList.begin() + i);
 
 		m_BlockResetCount--;
 
 	} else {
-		m_NowBlock = m_Blocks[m_NextBlockNumber];
-		m_NowBlockNumber = m_NextBlockNumber;
+		m_NowBlock = m_Blocks[m_pNextBlock->GetBlockNumber()];
+		m_NowBlockNumber = m_pNextBlock->GetBlockNumber();
 
-		m_NextBlockNumber = m_BlockList[i];
-
-		m_NextBlock = m_NextAndHoldBlocks[m_NextBlockNumber];
+		m_pNextBlock->SetBlockNumber( m_BlockList[i] );
+		m_pNextBlock->SetBlock( m_NextAndHoldBlocks[m_pNextBlock->GetBlockNumber()] );
 
 		m_BlockList.erase(m_BlockList.begin() + i);
 
@@ -315,7 +286,7 @@ void CStage::InitNowPosition()
 
 void CStage::BlockDown()
 {
-	if( m_BlockDownCount >= 30 ){
+	if( m_BlockDownCount >= m_BlockDownTime ){
 		m_NowPosition.y++;
 		BlockPutCheck();
 		m_BlockDownCount = 0;
@@ -376,8 +347,8 @@ void CStage::BlockPutCheck()
 
 void CStage::BlockDelete()
 {
+	m_DeleteLine = 0;
 	if( m_isPutBlock == false ) return;
-	
 	for( int y = HEIGHT-2; y >= 0; y-- ){
 		int blockCount = 0;
 		for( int x = 1; x < WIDTH-1; x++ ){
@@ -394,6 +365,7 @@ void CStage::BlockDelete()
 				}
 			}
 			y = HEIGHT - 1;
+			m_DeleteLine++;
 		}
 	}
 	m_isPutBlock = false;

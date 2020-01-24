@@ -2,6 +2,8 @@
 #define STAGE_H
 
 #include "..\Block\BlockBase.h"
+#include "..\NextBlock\NextBlock.h"
+#include "..\HoldBlock\HoldBlock.h"
 
 #include <vector>
 #include <memory>
@@ -24,7 +26,9 @@ public:
 	void CreateStage();
 	void CreateBlock();
 	void InitNowPosition();
+	int GetDeleteLine() const { return m_DeleteLine; }
 	bool GetGameEnd() const { return m_isGameEnd; }
+	void SetDownTime( const int& time ){ m_BlockDownTime = time; }
 
 private:
 	void BlockDown();
@@ -37,21 +41,22 @@ private:
 private:
 	std::vector<std::vector<int>> m_MainStage;
 	std::vector<std::vector<int>> m_ColorStage;
-	std::vector<std::vector<int>> m_HoldAndNextBlock;
 	std::vector<std::shared_ptr<CBlockBase>>	m_Blocks;
 	std::vector<std::shared_ptr<CBlockBase>>	m_NextAndHoldBlocks;
 	std::shared_ptr<CBlockBase> m_NowBlock;
-	std::shared_ptr<CBlockBase> m_NextBlock;
-	std::shared_ptr<CBlockBase> m_HoldBlock;
 	Vector2D					m_NowPosition;
 	Vector2D					m_AfterFallingPosition;
 
+	std::unique_ptr<CNextBlock>	m_pNextBlock;
+	std::unique_ptr<CHoldBlock>	m_pHoldBlock;
+
 	int m_BlockDownCount;
+	int m_BlockDownTime;
 	int m_BlockResetCount;
 	int m_NowBlockNumber;
-	int m_HoldBlockNumber;
-	int m_NextBlockNumber;
 	std::vector<int> m_BlockList;
+
+	int m_DeleteLine;
 
 	bool m_isPutBlock;
 	bool m_isHoldBlock;
