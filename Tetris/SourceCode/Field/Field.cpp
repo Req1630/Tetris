@@ -41,8 +41,8 @@ void CField::FieldDataRead()
 	GetInstance()->m_Field = read( GetInstance()->FIELD_TEXT_PATH );
 
 	// •`‰æ”ÍˆÍ‚Ì‚‚³‚Æ•‚ðŽæ“¾,
-	GetInstance()->m_FadeWidth = GetInstance()->m_Field[0].size();
-	GetInstance()->m_FadeHeight = GetInstance()->m_Field.size();
+	GetInstance()->m_FadeWidth = (int)GetInstance()->m_Field[0].size();
+	GetInstance()->m_FadeHeight = (int)GetInstance()->m_Field.size();
 
 	std::vector<std::string> field = read( GetInstance()->TITLE_TEXT_PATH );
 	for( int y = 0; y < GetInstance()->m_FadeHeight; y++ ){

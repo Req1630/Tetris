@@ -40,6 +40,7 @@ public:
 	{}
 	virtual ~CBlockBase(){}
 
+	// 座標の設定.
 	void SetPositon( const Vector2D& pos )
 	{
 		for( int i = 0; i > 4; i++ ){
@@ -47,6 +48,7 @@ public:
 			m_Position[i].y += pos.y;
 		}
 	}
+	// 左回転.
 	void LeftRot()
 	{
 		for( int i = 1; i < 4; i++ ){
@@ -56,6 +58,7 @@ public:
 			m_Position[i].y = -tmpPosition_x;
 		}
 	}
+	// 右回転.
 	void RightRot()
 	{
 		for( int i = 1; i < 4; i++ ){
@@ -65,18 +68,22 @@ public:
 			m_Position[i].y = tmpPosition_x;
 		}
 	}
+	// 左回転.
 	void LeftRotation()
 	{
 		if( m_RotationNum == 1 ) return;
 		LeftRot();
 	}
+	// 右回転.
 	void RightRotation()
 	{
 		if( m_RotationNum == 1 ) return;
 		RightRot();
 	}
 
+	// ブロック一つの座標を取得.
 	Vector2D GetPosition( int index ){ return m_Position[index]; }
+	// 色の取得.
 	enColor GetColor(){ return m_Color; }
 protected:
 	std::vector<Vector2D>	m_Position;	// ブロック一つ当たりの座標.

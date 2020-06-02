@@ -35,12 +35,16 @@ void CTitleScene::Update()
 	if( GetAsyncKeyState( VK_RETURN ) & 0x0001 ){
 		switch( m_Select ){
 			case Start:
+				Beep( 400, 100 );
+				Beep( 494, 100 );
+				Beep( 554, 100 );
 				m_pSceneManager->Change( std::make_shared<CGameScene>(m_pSceneManager) );
-				
 				break;
 			case End:
+				Beep( 554, 100 );
+				Beep( 494, 100 );
+				Beep( 400, 100 );
 				m_isGameEnd = true;
-
 				break;
 		}
 	}

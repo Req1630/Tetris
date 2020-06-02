@@ -20,22 +20,37 @@ public:
 	CStage();
 	~CStage();
 
+	// 操作関数.
 	void Control();
+	// 更新関数.
 	void Update();
+	// 描画関数.
 	void Render();
+	// ステージの作成.
 	void CreateStage();
+	// ブロックの作成.
 	void CreateBlock();
+	// 現在の座標.
 	void InitNowPosition();
+	// 消したラインの取得関数.
 	int GetDeleteLine() const { return m_DeleteLine; }
+	// ゲーム終了したか.
 	bool GetGameEnd() const { return m_isGameEnd; }
+	// 下に落とす時間の設定かんすう.
 	void SetDownTime( const int& time ){ m_BlockDownTime = time; }
 
 private:
+	// 下に落とす関数.
 	void BlockDown();
+	// ブロックが置かれたか確認.
 	void BlockPutCheck();
+	// ブロックを消す関数.
 	void BlockDelete();
+	// ゲームオーバーか確認.
 	void GameOverCheck();
+	// ゲームオーバー後の描画が終わったか.
 	bool GameOverRender();
+	// ブロックが重なっているか.
 	bool IsOverlappedBlock( const Vector2D& pos, int index );
 
 private:

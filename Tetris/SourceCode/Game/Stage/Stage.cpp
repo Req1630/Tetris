@@ -38,6 +38,9 @@ CStage::~CStage()
 {
 }
 
+//-------------------------------------------.
+// 操作関数.
+//-------------------------------------------.
 void CStage::Control()
 {
 	if( GetAsyncKeyState( VK_RIGHT ) & 0x0001 ){
@@ -117,6 +120,9 @@ void CStage::Control()
 	}
 }
 
+//-------------------------------------------.
+// 更新関数.
+//-------------------------------------------.
 void CStage::Update()
 {
 	if( m_isGameOver == true ) return;
@@ -148,6 +154,9 @@ void CStage::Update()
 	
 }
 
+//-------------------------------------------.
+// 描画関数.
+//-------------------------------------------.
 void CStage::Render()
 {
 	if( GameOverRender() == true ) return;
@@ -209,6 +218,9 @@ void CStage::Render()
 	BlockDelete();
 }
 
+//-------------------------------------------.
+// ステージの作成.
+//-------------------------------------------.
 void CStage::CreateStage()
 {
 	for( int x = 0; x < WIDTH; x++ ){
@@ -224,6 +236,9 @@ void CStage::CreateStage()
 	}
 }
 
+//-------------------------------------------.
+// ブロックの作成.
+//-------------------------------------------.
 void CStage::CreateBlock()
 {
 	auto initBlock = [&]( int index, std::vector<Vector2D> pos, enColor color, int rot )
@@ -240,6 +255,9 @@ void CStage::CreateBlock()
 	initBlock( 6, { {0,0}, {0,-1}, { 1,0}, { 0,1} }, enColor::L_BLACK, 4 );
 }
 
+//-------------------------------------------.
+// 現在の座標.
+//-------------------------------------------.
 void CStage::InitNowPosition()
 {
 	m_NowPosition.x = INIT_POSITION_X;
@@ -284,6 +302,9 @@ void CStage::InitNowPosition()
 	}
 }
 
+//-------------------------------------------.
+// 下に落とす関数.
+//-------------------------------------------.
 void CStage::BlockDown()
 {
 	if( m_BlockDownCount >= m_BlockDownTime ){
@@ -294,6 +315,9 @@ void CStage::BlockDown()
 	m_BlockDownCount++;
 }
 
+//-------------------------------------------.
+// ゲームオーバーか確認.
+//-------------------------------------------.
 void CStage::GameOverCheck()
 {
 	m_NowPosition.y++;
@@ -302,11 +326,16 @@ void CStage::GameOverCheck()
 		if( m_NowPosition.y != INIT_POSITION_Y+1 ) continue;
 		m_NowPosition.y--;
 		m_isGameOver = true;
+		Beep( 400, 50 );
+		Beep( 100, 50 );
 		return;
 	}
 	m_NowPosition.y--;
 };
 
+//-------------------------------------------.
+// ゲームオーバー後の描画が終わったか.
+//-------------------------------------------.
 bool CStage::GameOverRender()
 {
 	if( m_isGameOver == false ) return false;
@@ -319,6 +348,7 @@ bool CStage::GameOverRender()
 				Sleep(40);
 			}
 		}
+		Beep( 200-y, 50 );
 	}
 	m_isGameEnd = true;
 	Sleep(100);
@@ -326,6 +356,9 @@ bool CStage::GameOverRender()
 	return true;
 }
 
+//-------------------------------------------.
+// ブロックが置かれたか確認.
+//-------------------------------------------.
 void CStage::BlockPutCheck()
 {
 	for( int i = 0; i < 4; i++ ){
@@ -345,6 +378,9 @@ void CStage::BlockPutCheck()
 	}
 }
 
+//-------------------------------------------.
+// ブロックを消す関数.
+//-------------------------------------------.
 void CStage::BlockDelete()
 {
 	m_DeleteLine = 0;
@@ -371,6 +407,9 @@ void CStage::BlockDelete()
 	m_isPutBlock = false;
 }
 
+//-------------------------------------------.
+// ブロックが重なっているか.
+//-------------------------------------------.
 bool CStage::IsOverlappedBlock( const Vector2D& pos, int index )
 {
 	int _x = pos.x + m_NowBlock->GetPosition( index ).x;

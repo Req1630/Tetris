@@ -13,6 +13,7 @@ public:
 	CHoldBlock();
 	~CHoldBlock();
 
+	// 描画.
 	void Render();
 	// ブロッククラスの取得.
 	void SetBlock( std::shared_ptr<CBlockBase> nextBlock ){ m_pBlock = nextBlock; }
