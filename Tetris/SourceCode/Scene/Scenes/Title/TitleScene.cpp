@@ -24,6 +24,7 @@ CTitleScene::~CTitleScene()
 
 void CTitleScene::Update()
 {
+	// ƒJ[ƒ\ƒ‹‚ÌˆÚ“®.
 	if( GetAsyncKeyState(VK_UP) & 0x0001 ){
 		m_Select = Start;
 		m_NoSelect = End;
@@ -32,6 +33,7 @@ void CTitleScene::Update()
 		m_Select = End;
 		m_NoSelect = Start;
 	}
+	// Œˆ’è.
 	if( GetAsyncKeyState( VK_RETURN ) & 0x0001 ){
 		switch( m_Select ){
 			case Start:
