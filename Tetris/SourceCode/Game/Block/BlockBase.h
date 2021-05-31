@@ -29,10 +29,10 @@ public:
 		, m_BlockChar	( "Å†" )
 	{}
 	CBlockBase( const std::vector<Vector2D> pos, const enColor& color, const int& rot )
-		: m_Position	{{pos[0].x,pos[0].y}, 
-						{ pos[1].x,pos[1].y},
-						{ pos[2].x,pos[2].y}, 
-						{ pos[3].x,pos[3].y}}
+		: m_Position	{{ pos[0].x,pos[0].y},
+						 { pos[1].x,pos[1].y},
+						 { pos[2].x,pos[2].y},
+						 { pos[3].x,pos[3].y}}
 		, m_Rotation	( 0 )
 		, m_RotationNum	( rot )
 		, m_Color		( color )
